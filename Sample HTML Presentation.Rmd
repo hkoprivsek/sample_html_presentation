@@ -1,0 +1,69 @@
+---
+title: 'Analyzing Melbourne Housing Market Data Via Parametric & Bootstrap Multiple Linear Regression'
+subtitle: 'Haley Koprivsek'
+date: <center><img src="img/WCUlogo.png" width = 250 height = 150></center>
+output:
+  ioslides_presentation:
+    css: custom2.css
+    slide_level: 3
+    smaller: no
+    fig_height: 5
+    fig_width: 7
+    widescreen: no
+    self_contained: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+### Table of Contents
+
++ Introduction
++ Exploratory Data Analysis
++ Performing Multiple Linear Regression
++ Bootstrap Multiple Linear Regression
++ Final Model
++ Conclusion & Discussion 
+
+### Introduction
+
++ Data set related to homes on the Melbourne housing market
+  - 34,857 total observations and 21 different variables
+  - 8 categorical variables (e.g. Suburb, Address, Method of Sale, etc.), 13 numerical (e.g.         Number of Rooms, Selling Price, Distance From Central Business District, etc.)
++ Exploratory Data Analysis & MLR with Selling Price as response variable
+  - Best MLR model chosen from several candidate models
+
+### Exploratory Data Analysis
+
++ Group location variable created using latitude/longitude data
+  - factor variable: **main.group**, 1 = in main cluster of houses, 0 = not in main cluster
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+library(knitr)
+library(dplyr)
+library(pander)
+library(tidyr)
+HousingData <- read.csv("https://pengdsci.github.io/datasets/MelbourneHousingMarket/MelbourneHousing.csv", header = TRUE)
+lon <- HousingData$Longtitude
+lat <- HousingData$Lattitude 
+plot(lon, lat, main = "Sites of houses sold")
+abline(v = 144.8, h = -38.0, col = "blue")
+abline(v = 145.3, h = -37.6, col = "blue")
+```
+
+```{r}
+main.group = (lon > 144.8) & (lon < 145.3) & (lat > -38.0) & (lat < -37.6)
+HousingData$main.group <- factor(main.group)
+HousingData$Type <- factor(HousingData$Type)
+HousingData$Distance.num <- as.numeric(HousingData$Distance)
+
+HousingData.Final <- HousingData[, c(3,4,5,11,12,13,14,15,22,23)]
+```
+### Initial Full Model
+
+```{r}
+full.model = lm(Price ~ ., data = HousingData.Final)
+kable(summary(full.model)$coef)
+```
+
